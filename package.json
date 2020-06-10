@@ -1,0 +1,30 @@
+{
+  "name": "node-opcua-sample",
+  "version": "0.4.5",
+  "description": "Simple OPCUA  client using node-opcua",
+  "main": "simple_client.js",
+  "scripts": {
+    "start": "node client.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/erossignon/node-opcua-sample.git"
+  },
+  "keywords": [
+    "opcua"
+  ],
+  "author": "Etienne Rossignon",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^13.9.2",
+    "async": "~3.2.0",
+    "node-opcua": "~2.5.1"
+  },
+  "devDependencies": {
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1"
+  }
+}
