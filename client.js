@@ -1,8 +1,4 @@
-const {
-    OPCUAClient,
-    ClientSubscription,
-    AttributeIds
-} = require("node-opcua");
+const opcua = require("node-opcua");
 
 let client;
 let subscription;
@@ -12,7 +8,7 @@ const opcClient = {
 
     connect: async function (endpointUrl) {
         // Подключение к OPC-серверу
-        client = OPCUAClient.create({
+        client = opcua.OPCUAClient.create({
             endpoint_must_exist: false,
             defaultSecureTokenLifetime: 40000,
             keepSessionAlive: true
@@ -24,7 +20,7 @@ const opcClient = {
     browse: async function (node) {
         // Просмотр потомков узла
         let data = {};
-        const browseResult = await this.session.browse(node);
+        const browseResult = await this.session.browse(nodesToBrowse);
         for (let r of browseResult.references) {
             data[r] = r;
         }
@@ -46,6 +42,7 @@ const opcClient = {
         // Отключение от OPC-сервера
         await client.disconnect();
     },
-}
+};
+
 
 module.exports = opcClient;

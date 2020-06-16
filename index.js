@@ -29,7 +29,6 @@ async function main() {
         const session = await client.createSession();
 
         const browseResult = await session.browse("RootFolder");
-
         console.log(browseResult.references.map((r) => r.browseName.toString()).join("\n"));
 
         const dataValue = await session.read({ nodeId: nodeId, attributeId: opcua.AttributeIds.Value });
@@ -59,7 +58,7 @@ async function main() {
                 samplingInterval: 1000,
                 discardOldest: true,
                 queueSize: 10
-            }, 2);
+            }, opcua.TimestampsToReturn.Both);
 
 
         monitoredItem.on("changed", (dataValue) => console.log(` Temperature = ${dataValue.value.value.toString()}`));

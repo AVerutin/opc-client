@@ -18,6 +18,7 @@
   "dependencies": {
     "@types/node": "^13.9.2",
     "async": "~3.2.0",
+    "data-store": "^4.0.3",
     "node-opcua": "~2.5.1"
   },
   "devDependencies": {

@@ -1,9 +1,18 @@
 const opcua = require("node-opcua");
+const db = require('data-store')({ path: process.cwd() + '/nodes.json' });
 
 const client = opcua.OPCUAClient.create({requestedSessionTimeout: 20000});
 
+const BrowseDirection = {
+    Forward: 0,
+    Inverse: 1,
+    Both: 2,
+    Invalid: 3
+}
+
 const endpointUrl = "opc.tcp://192.168.11.90:49320";
 const nodeId = "ns=2;s=LEVEL.ДСП.б процент расплава";
+const DSPID = "ns=2;s=LEVEL.ДСП";
 const nodeWrite = "ns=2;s=LEVEL.Сыпучие.Ручной ввод.вес";
 const nodeBase = "ns=2;s=";
 const loose_dsp = 'LEVEL.Сыпучие.ДСП.';
@@ -81,13 +90,87 @@ async function set_subs(node_path, node_name, timeout = 0) {
             discardOldest: true,
             queueSize: 1
         },
-        2); // opcua.read_service.TimestampsToReturn.Both = 2
+        opcua.TimestampsToReturn.Both); // opcua.read_service.TimestampsToReturn.Both = 2
     
 
     monitoredItem.on("changed",function(dataValue){
-        console.log("[", node_name, "] => ", dataValue.value.value);
+        let value = dataValue.value.value;
+        console.log("[", node_name, "] => ", value);
+        db.set(node_name, value);
         // Обработка полученного значения
     });
+}
+
+async function browseNode(nodeID) {
+    // Получение всех потомков узла
+    const nodesToBrowse = [{
+        nodeId: nodeID,
+        referenceTypeId: "Organizes",
+        includeSubtypes: true,
+        browseDirection: BrowseDirection.Forward,
+        resultMask: 0x3f
+    },
+    {
+        nodeId: nodeID,
+        referenceTypeId: "Aggregates",
+        includeSubtypes: true,
+        browseDirection: BrowseDirection.Forward,
+        resultMask: 0x3f
+    },
+    {
+        nodeId: nodeID,
+        referenceTypeId: "HasSubtype",
+        includeSubtypes: true,
+        browseDirection: BrowseDirection.Forward,
+        resultMask: 0x3f
+    },];
+    let results = 0;
+    try {
+        results = await the_session.browse(nodesToBrowse);
+    } catch (e) {
+        console.log("Ошибка при просмотре узла: ", e);
+    }
+    const children = []; // Список ссылок на всех потомков заданного узла
+
+    const res1 = results[0];
+    if (res1.references) {
+        for (let i = 0; i < res1.references.length; i++) {
+            const ref = res1.references[i];
+            children.push({
+                browseName: ref.browseName.toString(),
+                nodeId: ref.nodeId,
+                nodeClass: ref.nodeClass,
+            });
+        }
+    }
+
+    const res2 = results[1];
+    if (res2.references) {
+        for (let i = 0; i < res2.references.length; i++) {
+            const ref = res2.references[i];
+            children.push({
+                browseName: ref.browseName.toString(),
+                nodeId: ref.nodeId,
+                nodeClass: ref.nodeClass,
+            });
+        }
+    }
+
+    const res3 = results[2];
+    if (res3.references) {
+        for (let i = 0; i < res3.references.length; i++) {
+            const ref = res3.references[i];
+            children.push({
+                browseName: ref.browseName.toString(),
+                nodeId: ref.nodeId,
+                nodeClass: ref.nodeClass,
+            });
+        }
+    }
+
+    for (let child of children) {
+        console.log(`[${child.browseName}] => Class (${child.nodeClass}) => Path (${child.nodeId.value})`);
+    }
 }
 
 
@@ -130,16 +213,17 @@ async function main (endpoint, nodeid) {
     await connect(endpoint);
     let val = await read_value(nodeWrite);
     console.log('[1] Прочитанное значение = ', val);
-    // for (let id of ids) {
-    //     let path = nodeBase + dsp;
-    //     await set_subs(path, id, 0)
-    // }
-    let res = await writeNodeValue(nodeWrite, opcua.DataType.Float, 50.0);
-    console.log(res[0].name);
-    val = await read_value(nodeWrite);
-    console.log('[2] Прочитанное значение = ', val);
+    for (let id of ids) {
+        let path = nodeBase + dsp;
+        await set_subs(path, id, 0)
+    }
+    // let res = await writeNodeValue(nodeWrite, opcua.DataType.Float, 50.0);
+    // console.log(res[0].name);
+    // val = await read_value(nodeWrite);
+    // console.log('[2] Прочитанное значение = ', val);
+    // await browseNode(DSPID)
 
-    await disconnect();
+    // await disconnect();
 }
 
 main(endpointUrl, nodeId);
