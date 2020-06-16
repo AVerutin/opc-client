@@ -1,7 +1,7 @@
 {
   "name": "node-opcua-sample",
   "version": "0.4.5",
-  "description": "Simple OPCUA  client using node-opcua",
+  "description": "Simple OPCUA client using node-opcua",
   "main": "simple_client.js",
   "scripts": {
     "start": "node client.js"

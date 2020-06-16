@@ -1,5 +1,21 @@
 const opcua = require("node-opcua");
-const db = require('data-store')({ path: process.cwd() + '/nodes.json' });
+const localdb = require('data-store')({ path: process.cwd() + '/nodes.json' });
+// Замена на PostgreSQL
+const sqlite3 = require('sqlite3').verbose();
+
+const db = new sqlite3.Database(process.cwd() + '/nodes.db', sqlite3.OPEN_READWRITE, (err) => {
+    if (err) {
+        console.log('DB connection error: ', err.message);
+        db = false;
+    } else {
+        console.log('Connected to db.');
+    }
+});
+
+const sqlInsert = "INSERT INTO 'Nodes' ('Name', 'Value') VALUES (?, ?);";
+const sqlUpdate = "UPDATE 'Nodes' SET 'Name' = '$1', 'Value' = $2 WHERE 'ID' = $3;";
+const sqlNodeID = "SELECT 'ID' FROM 'Nodes' WHERE 'Name' = $1;" ;
+const sqlLastID = "SELECT last_insert_rowid() AS 'rowID';";
 
 const client = opcua.OPCUAClient.create({requestedSessionTimeout: 20000});
 
@@ -50,6 +66,61 @@ async function read_value(nodeid) {
 
 // Подписка на события
 async function set_subs(node_path, node_name, timeout = 0) {
+    // Проверить наличие записи в БД с именем node_name
+    // если такой записи не существует, то создать и получить ID для вновь созданной записи
+    let nodeID = false;
+    let result = false;
+
+    db.serialize(() => {
+        db.get(sqlNodeID, node_name, (err, row) => {
+            if (err) {
+                console.log(`DB error get ID for node [${node_name}]!`);
+            }
+            console.log(row.ID + "\t" + node_name);
+            // nodeID = row.ID;
+        });
+      });
+
+
+    // let result = db.exec(sqlNodeID, node_name, (err, result) => {
+    //     if (err) {
+    //         console.log(`DB error in creating record for ${node_name}!`);
+    //     }
+    //     nodeID = result.ID;
+    // });
+
+    // if (result.recordset.length > 0) {
+    //     nodeID = result.recordset[0].ID;
+    // }
+
+    if (!nodeID) {
+        db.serialize(() => {
+            var stmt = db.prepare(sqlInsert);
+            stmt.run(node_name, 0);
+            stmt.finalize();
+
+            db.get(sqlLastID, (err, row) => {
+                nodeID = row.rowID;
+                console.log(row.id + ": " + row.info);
+            });
+        });
+
+        // Нет записи для текущей переменной сервера, создадим запись в ДБ,
+        // получим ID вновь созданной записи и сохраним номер ID в data-store
+        // "SELECT last_insert_rowid()"
+        // try { 
+        //     db.run(sqlInsert, [node_name, value]);
+        //     result = db.all(sqlLastID);
+        // } catch (e) {
+        //     console.log(`DB error creating record for ${node_name}!`);
+        // }
+        // for (let row of result) {
+        //     nodeID = row.Last_Inserted_Id;
+        // }
+    }
+
+
+
     // Массив значений наименований ключей
     const nodeid = node_path + node_name;
     the_subscription = opcua.ClientSubscription.create(the_session,{
@@ -90,16 +161,27 @@ async function set_subs(node_path, node_name, timeout = 0) {
             discardOldest: true,
             queueSize: 1
         },
-        opcua.TimestampsToReturn.Both); // opcua.read_service.TimestampsToReturn.Both = 2
+        opcua.TimestampsToReturn.Both); // opcua.TimestampsToReturn.Both = 2
     
 
-    monitoredItem.on("changed",function(dataValue){
+    monitoredItem.on("changed", function(dataValue){
+        //FIXME: Изменить запрос на UPDATE
+        // сделать объект вида {'name': ID} и искать по имени свойства требуемый ID в базе данных
+        // Если ID не найден, значит для этого свойства нет записи в БД
+        // Поэтому создать запись в БД, получить сформированный для нее ID и сохранить в объекте (data-store)
         let value = dataValue.value.value;
+
         console.log("[", node_name, "] => ", value);
-        db.set(node_name, value);
+        // db.run(sqlUpdate, [nodeID, node_name, value], err => {
+        //     if (err) {
+        //         console.log('DB inserting error');
+        //     }
+        // })
+        // localdb.set(node_name, value);
         // Обработка полученного значения
     });
 }
+
 
 async function browseNode(nodeID) {
     // Получение всех потомков узла
@@ -209,7 +291,22 @@ async function disconnect() {
     await client.disconnect();
 }
 
+async function createDb() {
+    const sqlString = "CREATE TABLE IF NOT EXISTS 'Nodes' ('ID' INTEGER PRIMARY KEY AUTOINCREMENT, 'Name' TEXT NOT NULL, 'Value' TEXT NOT NULL);";
+    try { 
+        db.run(sqlString);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
 async function main (endpoint, nodeid) {
+    if (!createDb()) {
+        console.log('DB connection error!');
+        return -1;
+    }
+
     await connect(endpoint);
     let val = await read_value(nodeWrite);
     console.log('[1] Прочитанное значение = ', val);
