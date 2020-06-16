@@ -4,6 +4,7 @@ const client = opcua.OPCUAClient.create({requestedSessionTimeout: 20000});
 
 const endpointUrl = "opc.tcp://192.168.11.90:49320";
 const nodeId = "ns=2;s=LEVEL.ДСП.б процент расплава";
+const nodeWrite = "ns=2;s=LEVEL.Сыпучие.Ручной ввод.вес";
 const nodeBase = "ns=2;s=";
 const loose_dsp = 'LEVEL.Сыпучие.ДСП.';
 const loose_naveska1 = 'LEVEL.Сыпучие.Навеска1.';
@@ -80,14 +81,40 @@ async function set_subs(node_path, node_name, timeout = 0) {
             discardOldest: true,
             queueSize: 1
         },
-        2 // opcua.read_service.TimestampsToReturn.Both
-    );
+        2); // opcua.read_service.TimestampsToReturn.Both = 2
+    
 
     monitoredItem.on("changed",function(dataValue){
         console.log("[", node_name, "] => ", dataValue.value.value);
         // Обработка полученного значения
     });
 }
+
+
+// Write value on node
+async function writeNodeValue(nodeId, dataType, newValue) {
+    // var nodeId = "ns=4;s=SetPointTemperature";
+    let res = 0;
+    var nodesToWrite = [
+      {
+        nodeId: nodeId,
+        attributeId: opcua.AttributeIds.Value,
+        value: {                                /*new DataValue(*/
+          value: {                              /* Variant */
+            dataType: dataType,                 // opcua.DataType.Float
+            value: newValue
+          }
+        }
+      }
+    ];
+  
+    try {
+        res = await the_session.write(nodesToWrite);
+    } catch (e) {
+        console.log(e);
+    }
+    return res;
+  }
 
 // close session
 async function disconnect() {
@@ -101,13 +128,18 @@ async function disconnect() {
 
 async function main (endpoint, nodeid) {
     await connect(endpoint);
-    // let val = await read_value(nodeid);
-    for (let id of ids) {
-        let path = nodeBase + dsp;
-        await set_subs(path, id, 0)
-    }
-    // console.log('Прочитанное значение = ', val);
-    // await disconnect();
+    let val = await read_value(nodeWrite);
+    console.log('[1] Прочитанное значение = ', val);
+    // for (let id of ids) {
+    //     let path = nodeBase + dsp;
+    //     await set_subs(path, id, 0)
+    // }
+    let res = await writeNodeValue(nodeWrite, opcua.DataType.Float, 50.0);
+    console.log(res[0].name);
+    val = await read_value(nodeWrite);
+    console.log('[2] Прочитанное значение = ', val);
+
+    await disconnect();
 }
 
 main(endpointUrl, nodeId);
