@@ -19,7 +19,8 @@
     "@types/node": "^13.9.2",
     "async": "~3.2.0",
     "data-store": "^4.0.3",
-    "node-opcua": "~2.5.1"
+    "node-opcua": "~2.5.1",
+    "pg": "^8.2.1"
   },
   "devDependencies": {
     "eslint-config-standard": "^14.1.1",

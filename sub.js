@@ -1,16 +1,33 @@
 const opcua = require("node-opcua");
-const localdb = require('data-store')({ path: process.cwd() + '/nodes.json' });
+// const localdb = require('data-store')({ path: process.cwd() + '/nodes.json' });
 // Замена на PostgreSQL
-const sqlite3 = require('sqlite3').verbose();
+const { Pool, Client } = require('pg');
 
-const db = new sqlite3.Database(process.cwd() + '/nodes.db', sqlite3.OPEN_READWRITE, (err) => {
-    if (err) {
-        console.log('DB connection error: ', err.message);
-        db = false;
-    } else {
-        console.log('Connected to db.');
-    }
+const dbclient = new Client({
+    user: 'pguser',
+    host: '192.168.56.104',
+    database: 'pguser',
+    password: 'pg_psswrd',
+    port: 5432,
 });
+
+const dbpool = new Pool({
+    user: 'pguser',
+    host: '192.168.56.104',
+    database: 'pguser',
+    password: 'pg_psswrd',
+    port: 5432,
+});
+
+
+// const db = new sqlite3.Database(process.cwd() + '/nodes.db', sqlite3.OPEN_READWRITE, (err) => {
+//     if (err) {
+//         console.log('DB connection error: ', err.message);
+//         db = false;
+//     } else {
+//         console.log('Connected to db.');
+//     }
+// });
 
 const sqlInsert = "INSERT INTO 'Nodes' ('Name', 'Value') VALUES (?, ?);";
 const sqlUpdate = "UPDATE 'Nodes' SET 'Name' = '$1', 'Value' = $2 WHERE 'ID' = $3;";
@@ -292,10 +309,11 @@ async function disconnect() {
 }
 
 async function createDb() {
-    const sqlString = "CREATE TABLE IF NOT EXISTS 'Nodes' ('ID' INTEGER PRIMARY KEY AUTOINCREMENT, 'Name' TEXT NOT NULL, 'Value' TEXT NOT NULL);";
+    const sqlString = "CREATE TABLE IF NOT EXISTS Nodes (ID INTEGER PRIMARY KEY, Name TEXT NOT NULL, Value REAL NOT NULL);";
     try { 
-        db.run(sqlString);
+        await dbpool.query(sqlString);
     } catch (e) {
+        console.log(e);
         return false;
     }
     return true;
@@ -307,13 +325,17 @@ async function main (endpoint, nodeid) {
         return -1;
     }
 
-    await connect(endpoint);
-    let val = await read_value(nodeWrite);
-    console.log('[1] Прочитанное значение = ', val);
-    for (let id of ids) {
-        let path = nodeBase + dsp;
-        await set_subs(path, id, 0)
+    let result = await dbpool.query('SELECT NOW()');
+    for (let row of result.rows) {
+        console.log(row.now);
     }
+    // await connect(endpoint);
+    // let val = await read_value(nodeWrite);
+    // console.log('[1] Прочитанное значение = ', val);
+    // for (let id of ids) {
+    //     let path = nodeBase + dsp;
+    //     await set_subs(path, id, 0)
+    // }
     // let res = await writeNodeValue(nodeWrite, opcua.DataType.Float, 50.0);
     // console.log(res[0].name);
     // val = await read_value(nodeWrite);
