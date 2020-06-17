@@ -6,8 +6,10 @@
 
 const opcua = require('node-opcua');
 
-const endpointUrl = "opc.tcp://opcuademo.sterfive.com:26543";
-const nodeId = "ns=1;s=Temperature";
+// const endpointUrl = "opc.tcp://opcuademo.sterfive.com:26543";
+// const nodeId = "ns=1;s=Temperature";
+const endpointUrl = "opc.tcp://192.168.11.90:49320";
+const nodeId = "ns=2;s=LEVEL.ДСП.б процент расплава";
 
 async function main() {
 
@@ -63,7 +65,7 @@ async function main() {
 
         monitoredItem.on("changed", (dataValue) => console.log(` Temperature = ${dataValue.value.value.toString()}`));
 
-        await new Promise((resolve) => setTimeout(resolve, 10000));
+        await new Promise((resolve) => setTimeout(resolve, 100000));
 
         await subscription.terminate();
 
