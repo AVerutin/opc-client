@@ -1,0 +1,9 @@
+{ 
+    "dbConfig": {
+        "user": "pguser",
+        "host": "192.168.56.104",
+        "database": "pguser",
+        "password": "pg_psswrd",
+        "port": 5432
+    }
+}
