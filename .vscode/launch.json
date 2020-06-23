@@ -16,8 +16,8 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Run Sub.js",
-            "program": "${workspaceFolder}/sub.js",
+            "name": "Run Client.js",
+            "program": "${workspaceFolder}/client.js",
             "skipFiles": [
                 "<node_internals>/**"
             ]

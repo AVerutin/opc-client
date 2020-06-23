@@ -15,13 +15,7 @@ const pk = 'LEVEL.ПК.';
 const mnlz = 'LEVEL.МНЛЗ.';
 const dsp = 'LEVEL.ДСП.';
 
-const ids = [
-    "б ручей 1",
-    "б ручей 2",
-    "б ручей 3",
-    "б ручей 4",
-    "б ручей 5",
-    "б ручей 6",
+const nodes_dsp = [
     "номер плавки",
     "температура",
     "б процент расплава",
@@ -29,7 +23,14 @@ const ids = [
     "б эрекер 2",
     "кислород"
 ];
-
+const nodes_mnlz = [
+    "б ручей 1",
+    "б ручей 2",
+    "б ручей 3",
+    "б ручей 4",
+    "б ручей 5",
+    "б ручей 6"
+]
 
 async function main(endpoint, nodeid) {
     opcua.init();
@@ -37,10 +38,15 @@ async function main(endpoint, nodeid) {
 
     // let val = await opcua.read_value(nodeid);
     // console.log('[1] Прочитанное значение = ', val);
-    for (let id of ids) {
+    for (let id of nodes_dsp) {
         let path = nodeBase + dsp;
         await opcua.set_subs(path, id, 0)
     }
+    for (let id of nodes_mnlz) {
+        let path = nodeBase + mnlz;
+        await opcua.set_subs(path, id, 0)
+    }
+
     // let res = await opcua.writeNodeValue(nodeWrite, opcua.dataType.Float, 30.0);
     // console.log(res[0].name);
     // val = await opcua.read_value(nodeWrite);
