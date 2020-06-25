@@ -1,4 +1,5 @@
 const opcua = require("./opcua");
+const nodeList = require('data-store')({ path: process.cwd() + '/NodesList.json' });
 
 const endpointUrl = "opc.tcp://192.168.11.90:49320";
 const nodeId = "ns=2;s=LEVEL.ДСП.номер плавки";
@@ -15,24 +16,25 @@ const pk = 'LEVEL.ПК.';
 const mnlz = 'LEVEL.МНЛЗ.';
 const dsp = 'LEVEL.ДСП.';
 
-const nodes_dsp = [
-    "номер плавки",
-    "температура",
-    "б процент расплава",
-    "б эрекер 1",
-    "б эрекер 2",
-    "кислород"
-];
-const nodes_mnlz = [
-    "б ручей 1",
-    "б ручей 2",
-    "б ручей 3",
-    "б ручей 4",
-    "б ручей 5",
-    "б ручей 6"
-]
+const Nodes = [];
 
 async function main(endpoint, nodeid) {
+
+    let sensors = {};
+
+    for (let i = 1; i < 9; ++i) {
+        let sensor_name = 'Sensor ' + i;
+        let template = {}
+        // template[sensor_name] = {};
+        template.ID = i;
+        template.Place = 'LEVEL.Сыпучие.Навеска1';
+        template.Name = 'вес' + i;
+        sensors[sensor_name] = template;
+    }
+    nodeList.set('Sensors', sensors);
+    
+
+
     opcua.init();
     await opcua.connect(endpoint);
 
@@ -42,10 +44,7 @@ async function main(endpoint, nodeid) {
         let path = nodeBase + dsp;
         await opcua.set_subs(path, id, 0)
     }
-    for (let id of nodes_mnlz) {
-        let path = nodeBase + mnlz;
-        await opcua.set_subs(path, id, 0)
-    }
+
 
     // let res = await opcua.writeNodeValue(nodeWrite, opcua.dataType.Float, 30.0);
     // console.log(res[0].name);

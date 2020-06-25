@@ -17,10 +17,10 @@ async function createDb() {
     return true;
 }
 
-const sqlInsert = "INSERT INTO Nodes (Name, Value) VALUES ($1, $2) RETURNING ID;";
+const sqlInsert = "INSERT INTO Nodes (Place, Name, Value) VALUES ($1, $2, $3) RETURNING ID;";
 const sqlUpdate = "UPDATE Nodes SET Value = $1 WHERE ID = $2;";
-const sqlNodeID = "SELECT ID FROM Nodes WHERE Name = $1;";
-const sqlCreateTable = "CREATE TABLE IF NOT EXISTS Nodes (ID serial PRIMARY KEY, Name TEXT NOT NULL, Value numeric NOT NULL);";
+const sqlNodeID = "SELECT ID FROM Nodes WHERE Name = $1 AND Place = $2;";
+const sqlCreateTable = "CREATE TABLE IF NOT EXISTS Nodes (ID serial PRIMARY KEY, Place TEXT NOT NULL, Name TEXT NOT NULL, Value numeric NOT NULL);";
 
 const BrowseDirection = {
     Forward: 0,
@@ -61,14 +61,14 @@ const Opcua = {
         let result = false;
 
         try {
-            result = await dbpool.query(sqlNodeID, [node_name]);
+            result = await dbpool.query(sqlNodeID, [node_name, node_path]);
         } catch (e) {
             console.log('DB Error: ', e);
         }
 
         if (result.rows.length == 0 ) {
             // Нет записи для текущего узла
-            let vals = [node_name, 0];
+            let vals = [node_path, node_name, 0];
             try {
                 result = await dbpool.query(sqlInsert, vals);
             } catch (e) {

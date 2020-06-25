@@ -1,0 +1,44 @@
+{
+  "Sensors": {
+    "Sensor 1": {
+      "ID": 1,
+      "Place": "LEVEL.Сыпучие.Навеска1",
+      "Name": "вес1"
+    },
+    "Sensor 2": {
+      "ID": 2,
+      "Place": "LEVEL.Сыпучие.Навеска1",
+      "Name": "вес2"
+    },
+    "Sensor 3": {
+      "ID": 3,
+      "Place": "LEVEL.Сыпучие.Навеска1",
+      "Name": "вес3"
+    },
+    "Sensor 4": {
+      "ID": 4,
+      "Place": "LEVEL.Сыпучие.Навеска1",
+      "Name": "вес4"
+    },
+    "Sensor 5": {
+      "ID": 5,
+      "Place": "LEVEL.Сыпучие.Навеска1",
+      "Name": "вес5"
+    },
+    "Sensor 6": {
+      "ID": 6,
+      "Place": "LEVEL.Сыпучие.Навеска1",
+      "Name": "вес6"
+    },
+    "Sensor 7": {
+      "ID": 7,
+      "Place": "LEVEL.Сыпучие.Навеска1",
+      "Name": "вес7"
+    },
+    "Sensor 8": {
+      "ID": 8,
+      "Place": "LEVEL.Сыпучие.Навеска1",
+      "Name": "вес8"
+    }
+  }
+}
