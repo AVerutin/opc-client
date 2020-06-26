@@ -124,11 +124,13 @@ async function main() {
         }
     }
 
-    try {
-        stanConfig = cnfFile.readFileSync('./stanConfiguration.txt', 'utf8').toString().split("\n");
-    } catch (err) {
-        console.log('Ошибка чтения файла конфигурации прокатного стана!\n', err.message);
-    }
+    // Разбирать второй конфигурационный файл не имеет смысла, т.к.они полностью идентичные
+    
+    // try {
+    //     stanConfig = cnfFile.readFileSync('./stanConfiguration.txt', 'utf8').toString().split("\n");
+    // } catch (err) {
+    //     console.log('Ошибка чтения файла конфигурации прокатного стана!\n', err.message);
+    // }
 }
 
 
