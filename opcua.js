@@ -82,7 +82,7 @@ const Opcua = {
         }
 
         // Массив значений наименований ключей
-        const nodeid = node_path + node_name;
+        const nodeid = `${node_path}.${node_name}`;
         the_subscription = opcua.ClientSubscription.create(the_session,{
             requestedPublishingInterval: 500,
             requestedLifetimeCount: 10,

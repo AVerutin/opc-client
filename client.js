@@ -1,5 +1,6 @@
 const opcua = require("./opcua");
 const nodeList = require('data-store')({ path: process.cwd() + '/NodesList.json' });
+const stanData = require('data-store')({ path: process.cwd() + '/stan_data.json' });
 
 const endpointUrl = "opc.tcp://192.168.11.90:49320";
 const nodeId = "ns=2;s=LEVEL.ДСП.номер плавки";
@@ -16,32 +17,31 @@ const pk = 'LEVEL.ПК.';
 const mnlz = 'LEVEL.МНЛЗ.';
 const dsp = 'LEVEL.ДСП.';
 
-const Nodes = [];
-
 async function main(endpoint, nodeid) {
 
-    let sensors = {};
-
-    for (let i = 1; i < 9; ++i) {
-        let sensor_name = 'Sensor ' + i;
-        let template = {}
-        // template[sensor_name] = {};
-        template.ID = i;
-        template.Place = 'LEVEL.Сыпучие.Навеска1';
-        template.Name = 'вес' + i;
-        sensors[sensor_name] = template;
+    let sensors = nodeList.get('Sensors');
+    for (let sensor in sensors) {
+        console.log(`[${sensors[sensor].ID}] => ${sensors[sensor].Place}.${sensors[sensor].Name}`);
     }
-    nodeList.set('Sensors', sensors);
-    
 
+    const snapshot = stanData.get('snapshot');
+    const machineSystem = snapshot.machineSystem;
+    const plavInfo = snapshot.plavInfo;
+
+    const ingots = machineSystem.ingots;
+    const signals = machineSystem.signals;
+    const threads = machineSystem.threads;
 
     opcua.init();
     await opcua.connect(endpoint);
 
     // let val = await opcua.read_value(nodeid);
     // console.log('[1] Прочитанное значение = ', val);
-    for (let id of nodes_dsp) {
-        let path = nodeBase + dsp;
+
+    const Nodes = nodeList.get('Sensors');
+    for (let node in Nodes) {
+        let path = nodeBase + dsp + Nodes[node].Place;
+        let id = Nodes[node].Name;
         await opcua.set_subs(path, id, 0)
     }
 
