@@ -22,5 +22,14 @@
                 "<node_internals>/**"
             ]
         },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Run read-config.js",
+            "program": "${workspaceFolder}/read-config.js",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
     ]
 }
