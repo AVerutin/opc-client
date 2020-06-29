@@ -16,8 +16,8 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Run Client.js",
-            "program": "${workspaceFolder}/client.js",
+            "name": "Run MES.js",
+            "program": "${workspaceFolder}/mes-server.js",
             "skipFiles": [
                 "<node_internals>/**"
             ]

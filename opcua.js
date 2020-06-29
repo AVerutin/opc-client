@@ -20,7 +20,7 @@ async function createDb() {
 const sqlInsert = "INSERT INTO Nodes (Place, Name, Value) VALUES ($1, $2, $3) RETURNING ID;";
 const sqlUpdate = "UPDATE Nodes SET Value = $1 WHERE ID = $2;";
 const sqlNodeID = "SELECT ID FROM Nodes WHERE Name = $1 AND Place = $2;";
-const sqlCreateTable = "CREATE TABLE IF NOT EXISTS Nodes (ID serial PRIMARY KEY, Place TEXT NOT NULL, Name TEXT NOT NULL, Value numeric NOT NULL);";
+const sqlCreateTable = "CREATE TABLE IF NOT EXISTS Nodes (ID serial PRIMARY KEY, Place TEXT NOT NULL, Name TEXT NOT NULL, Value TEXT NOT NULL);";
 
 const BrowseDirection = {
     Forward: 0,
@@ -68,7 +68,8 @@ const Opcua = {
 
         if (result.rows.length == 0 ) {
             // Нет записи для текущего узла
-            let vals = [node_path, node_name, 0];
+            let currValue = await this.read_value(`${node_path}.${node_name}`);
+            let vals = [node_path, node_name, currValue];
             try {
                 result = await dbpool.query(sqlInsert, vals);
             } catch (e) {
@@ -92,11 +93,11 @@ const Opcua = {
             priority: 1
         });
 
-        the_subscription.on("started",function(){
+        the_subscription.on("started", function(){
             console.log("subscription started [subscriptionId=", the_subscription.subscriptionId, "]");
         })
 
-        the_subscription.on("terminated",function(){
+        the_subscription.on("terminated", function(){
             console.log("terminated");
             disconnect();
         });
@@ -132,8 +133,8 @@ const Opcua = {
             } catch (e) {
                 console.log("DB Error: ", e);
             }
-            if (res ==0 ) {
-                console.log("DB => updated 0 rows!");
+            if (res == 0 ) {
+                console.log("DB error => updated 0 rows!");
             }
         });
     },
@@ -204,7 +205,7 @@ const Opcua = {
                 });
             }
         }
-
+        return children;
         // for (let child of children) {
         //     console.log(`[${child.browseName}] => Class (${child.nodeClass}) => Path (${child.nodeId.value})`);
         // }

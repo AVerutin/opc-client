@@ -1,4 +1,5 @@
 const cnfFile = require('fs');
+// const snapshot = require('data-store')({ path: process.cwd() + '/snapshot.json' });
 
 function analizeString(message) {
     let msg = message.trim();
@@ -41,7 +42,9 @@ function analizeString(message) {
 
 async function main() {
     let rollingMill = null;
-    let stanConfig = null;
+    // let stanConfig = null;
+    let requestSnapshot = null;
+    let snap = null;
     const objects = [];
     let object = {};
     let subObject = {};
@@ -95,12 +98,12 @@ async function main() {
                 // Класс уже открыт, открываем вложенный клас
                 startSubClass = true;
                 subObject = {};
-                subObject.className = subClassName;
+                subObject['ИмяКласса'] = subClassName;
             } else {
                 // Открываем класс
                 startClass = true;
                 object = {};
-                object.className = className;
+                object['ИмяКласса'] = className;
             }
         } else 
 
@@ -125,12 +128,19 @@ async function main() {
     }
 
     // Разбирать второй конфигурационный файл не имеет смысла, т.к.они полностью идентичные
-    
-    // try {
-    //     stanConfig = cnfFile.readFileSync('./stanConfiguration.txt', 'utf8').toString().split("\n");
-    // } catch (err) {
-    //     console.log('Ошибка чтения файла конфигурации прокатного стана!\n', err.message);
-    // }
+    rollingMill = null;
+
+    try {
+        requestSnapshot = cnfFile.readFileSync('./snapshot.json', 'utf8');
+    } catch (err) {
+        console.log('Ошибка чтения файла конфигурации прокатного стана!\n', err.message);
+    }
+
+    if (requestSnapshot) {
+        snap = JSON.parse(requestSnapshot);
+    }
+
+    console.log(snap.connected);
 }
 
 
