@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>Тракт сыпучих</title>
+    <style type="text/css">
+        h3 {
+            color: red;
+            font-size: 18px;
+            text-align: left;
+        }
+        table, tr, th, td {
+            border-style: solid;
+            border-width: 1px;
+            padding: 0px;
+            margin: 0px;
+        }
+        td {
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Server has been started...</h3>
+    <table id="table_nodes" cellspacing="0">
+        <tr>
+            <th>Переменая</th>
+            <th>Значение</th>
+        </tr>
+    </table>
+</body>
+</html>
+
+<script>
+    data = {},
+    window.onload = function () {
+
+        this.get_data();
+        if (this._timer) clearInterval(this._timer);
+            if (!this._timer) {
+                this._timer = setInterval(() => {
+                    this.update_data();
+                }, 5000);
+            } 
+    },
+    
+    addRow = function(id, name, value) {
+        var tbody = document.getElementById("table_nodes").getElementsByTagName("TBODY")[0];
+        var row = document.createElement("TR")
+        var td1 = document.createElement("TD")
+        td1.appendChild(document.createTextNode(name))
+        td1.setAttribute('id', id + '_name')
+        var td2 = document.createElement("TD")
+        td2.appendChild (document.createTextNode(value))
+        td2.setAttribute('id', id + '_value');
+        row.appendChild(td1);
+        row.appendChild(td2);
+        tbody.appendChild(row);
+  },
+
+    get_data = async function () {
+        let request = new XMLHttpRequest();
+        url = 'http://localhost/api/get_data';
+        request.open('GET', url);
+        request.responseType = 'json';
+        request.onload = function() {
+            const nodes = request.response;
+            for (let node of nodes) {
+                addRow(node.id, node.name, node.value);
+            }
+        };
+        request.send();
+    },
+
+    update_data = function() {
+        let request = new XMLHttpRequest();
+        url = 'http://localhost/api/get_data';
+        request.open('GET', url);
+        request.responseType = 'json';
+        request.onload = function() {
+            const nodes = request.response;
+            for (let node of nodes) {
+                document.getElementById(node.id + '_value').innerHTML = node.value;
+            }
+        };
+        request.send();
+    }
+
+    // Изменение значения атрибута:
+    // document.getElementById(id).attribute = 'new value'
+    // <img id="myImage" src="smiley.gif">
+    // document.getElementById("myImage").src = "landscape.jpg";
+    
+</script>
+

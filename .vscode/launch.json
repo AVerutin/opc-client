@@ -5,8 +5,17 @@
     "version": "0.5.0",
     "configurations": [
         {
-            "name": "Run index.js",
-            "program": "${workspaceFolder}/index.js",
+            "name": "Attach",
+            "port": 9229,
+            "request": "attach",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node"
+        },        
+        {
+            "name": "Run server.js",
+            "program": "${workspaceFolder}/server.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"

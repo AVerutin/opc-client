@@ -41,6 +41,8 @@ function analizeString(message) {
 };
 
 async function main() {
+    //FIXME: Необходимо организовать возможность каскадного вложения объектов один в другой более чем 1 уровень
+
     let rollingMill = null;
     // let stanConfig = null;
     let requestSnapshot = null;

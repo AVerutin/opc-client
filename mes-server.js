@@ -43,6 +43,7 @@ async function main(endpoint, nodeid) {
     for (let node in Nodes) {
         let path = `${nodeBase}.${Nodes[node].Place}`;
         let id = Nodes[node].Name;
+        console.log(node);
         await opcua.set_subs(path, id, 0)
     }
 
