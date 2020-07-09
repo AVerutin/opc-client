@@ -1,13 +1,5 @@
 const opcua = require("node-opcua");
-const { Pool /* , Client */ } = require('pg');
-
-// const dbclient = new Client({
-//     user: 'pguser',
-//     host: '192.168.56.104',
-//     database: 'pguser',
-//     password: 'pg_psswrd',
-//     port: 5432,
-// });
+const { Pool } = require('pg');
 
 const dbpool = new Pool({
     user: 'pguser',
@@ -20,7 +12,6 @@ const dbpool = new Pool({
 const sqlInsert = "INSERT INTO Nodes (Name, Value) VALUES ($1, $2) RETURNING ID;";
 const sqlUpdate = "UPDATE Nodes SET Value = $1 WHERE ID = $2;";
 const sqlNodeID = "SELECT ID FROM Nodes WHERE Name = $1;" ;
-const sqlLastID = "SELECT last_insert_rowid() AS ID;";
 const sqlCreateTable = "CREATE TABLE IF NOT EXISTS Nodes (ID serial PRIMARY KEY, Name TEXT NOT NULL, Value numeric NOT NULL);";
 
 const client = opcua.OPCUAClient.create({requestedSessionTimeout: 20000});
