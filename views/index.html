@@ -33,6 +33,15 @@
 
 <script>
     data = {},
+    // ws = new WebSocket ('ws://x.cloudx.cx:9000');
+    function $(a) { return document.getElementById(a) }
+    ws = new WebSocket ('ws://localhost:9000');
+    ws.onmessage = function (message) {
+        var event = JSON.parse(message.data);
+        // В объекте event лежит разобранный ответ от сервера
+    }
+
+
     window.onload = function () {
 
         this.get_data();
